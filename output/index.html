@@ -1,0 +1,901 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Domo Apps — PMM Writing Test Deliverables</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    /* ========================================
+       DOMO DESIGN TOKENS (from Figma + Playbook)
+       ======================================== */
+    :root {
+      /* Colors — Playbook canonical */
+      --domo-blue: #99CCEE;
+      --domo-blue-dark: #7BB8E0;
+      --domo-navy: #0A2953;
+      --domo-teal: #29B5E8;
+      --accent-orange: #FF9922;
+      --accent-orange-hover: #E8891F;
+      --accent-purple: #776CB0;
+      --accent-mint: #ADD4C1;
+
+      /* Neutrals */
+      --neutral-50: #F1F6FA;
+      --neutral-100: #DCE4EA;
+      --neutral-200: #B7C1CB;
+      --neutral-600: #68737F;
+      --neutral-900: #3F454D;
+
+      /* Figma-specific tokens */
+      --bg-light: #F3F5F7;
+      --bg-section: #F9FBFC;
+
+      /* Typography */
+      --font-primary: 'Open Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+
+      /* Spacing (from Figma) */
+      --space-xs: 4px;
+      --space-sm: 8px;
+      --space-md: 16px;
+      --space-lg: 24px;
+      --space-xl: 32px;
+      --space-2xl: 48px;
+      --space-3xl: 64px;
+      --space-4xl: 80px;
+
+      /* Layout */
+      --page-width: 1280px;
+      --content-width: 1152px;
+      --section-padding: 64px;
+
+      /* Depth */
+      --shadow-sm: 0 1px 3px rgba(63,69,77,0.08), 0 1px 2px rgba(63,69,77,0.06);
+      --shadow-md: 0 4px 12px rgba(63,69,77,0.1), 0 2px 4px rgba(63,69,77,0.06);
+      --shadow-lg: 0 8px 20px rgba(63,69,77,0.08), 0 4px 8px rgba(63,69,77,0.04);
+      --shadow-blue-glow: 0 4px 20px rgba(153, 204, 238, 0.3);
+      --shadow-orange-glow: 0 4px 20px rgba(255, 153, 34, 0.3);
+
+      /* Radius (from Figma) */
+      --radius-sm: 4px;
+      --radius-md: 8px;
+      --radius-lg: 12px;
+      --radius-xl: 16px;
+
+      /* Animation */
+      --ease-smooth: cubic-bezier(0.83, 0, 0.17, 1);
+      --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    /* ========================================
+       RESET & BASE
+       ======================================== */
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: var(--font-primary);
+      color: var(--neutral-900);
+      background: #FFFFFF;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      line-height: 1.6;
+    }
+
+    /* ========================================
+       TYPOGRAPHY SCALE (from Figma)
+       ======================================== */
+    .display-xl { font-size: clamp(40px, 5vw, 80px); line-height: 1.1; font-weight: 400; letter-spacing: -0.8px; }
+    .display-l  { font-size: clamp(36px, 4vw, 64px); line-height: 1.1; font-weight: 600; letter-spacing: -0.8px; }
+    .h1         { font-size: clamp(32px, 3.5vw, 48px); line-height: 1.1; font-weight: 400; letter-spacing: -0.4px; }
+    .h2         { font-size: clamp(24px, 2.5vw, 36px); line-height: 1.1; font-weight: 400; letter-spacing: -0.4px; }
+    .h3         { font-size: clamp(22px, 2vw, 32px); line-height: 1.1; font-weight: 400; letter-spacing: -0.4px; }
+    .h4         { font-size: clamp(18px, 1.5vw, 24px); line-height: 1.1; font-weight: 600; }
+    .body-xl    { font-size: clamp(16px, 1.25vw, 20px); line-height: 1.4; font-weight: 400; }
+    .body-l     { font-size: 18px; line-height: 1.4; font-weight: 400; }
+    .body-m     { font-size: 16px; line-height: 1.4; font-weight: 400; }
+    .body-s     { font-size: 14px; line-height: 1.43; font-weight: 400; }
+    .body-s-semi { font-size: 14px; line-height: 1.5; font-weight: 600; }
+
+    /* ========================================
+       LAYOUT
+       ======================================== */
+    .page-section {
+      width: 100%;
+      padding: var(--space-3xl) var(--space-3xl);
+    }
+
+    .content-wrap {
+      max-width: var(--content-width);
+      margin: 0 auto;
+    }
+
+    /* ========================================
+       NAV — Minimal top bar
+       ======================================== */
+    .nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(255,255,255,0.95);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--neutral-100);
+      padding: var(--space-md) var(--space-3xl);
+    }
+
+    .nav-inner {
+      max-width: var(--content-width);
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--space-lg);
+    }
+
+    .nav-logo svg { height: 28px; width: auto; }
+
+    .nav-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--neutral-600);
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: var(--space-xl);
+      list-style: none;
+    }
+
+    .nav-links a {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--neutral-600);
+      text-decoration: none;
+      transition: color 0.3s var(--ease-smooth);
+    }
+
+    .nav-links a:hover { color: var(--domo-blue); }
+    .nav-links a.active { color: var(--neutral-900); }
+
+    /* ========================================
+       SECTION TITLE (from Figma Text Section Title)
+       ======================================== */
+    .section-title {
+      margin-bottom: var(--space-2xl);
+    }
+
+    .section-label {
+      display: inline-block;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: var(--domo-teal);
+      margin-bottom: var(--space-sm);
+    }
+
+    .section-title .h2 {
+      margin-bottom: var(--space-md);
+    }
+
+    .section-title .body-xl {
+      color: var(--neutral-600);
+      max-width: 720px;
+    }
+
+    .section-title.center {
+      text-align: center;
+    }
+
+    .section-title.center .body-xl {
+      margin: 0 auto;
+    }
+
+    /* ========================================
+       BUTTONS (from Figma Button component)
+       ======================================== */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-sm);
+      font-family: var(--font-primary);
+      font-weight: 600;
+      font-size: 15px;
+      border: none;
+      cursor: pointer;
+      transition: all 0.3s var(--ease-smooth);
+      text-decoration: none;
+    }
+
+    .btn-primary {
+      padding: 12px 24px;
+      background: var(--accent-orange);
+      color: white;
+      border-radius: var(--radius-md);
+    }
+
+    .btn-primary:hover {
+      background: var(--accent-orange-hover);
+      transform: translateY(-1px);
+      box-shadow: var(--shadow-orange-glow);
+    }
+
+    .btn-secondary {
+      padding: 12px 24px;
+      background: transparent;
+      color: white;
+      border: 1.5px solid rgba(255,255,255,0.4);
+      border-radius: var(--radius-md);
+    }
+
+    .btn-secondary:hover {
+      border-color: white;
+      background: rgba(255,255,255,0.1);
+    }
+
+    .btn-secondary.dark {
+      color: var(--neutral-900);
+      border-color: var(--neutral-200);
+    }
+
+    .btn-secondary.dark:hover {
+      border-color: var(--domo-blue);
+      color: var(--domo-blue);
+    }
+
+    .btn-group {
+      display: flex;
+      gap: var(--space-md);
+      flex-wrap: wrap;
+    }
+
+    /* ========================================
+       CARD (from Figma Card Basic)
+       ======================================== */
+    .card {
+      padding: var(--space-lg);
+      background: white;
+      border: 1px solid var(--neutral-100);
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-sm);
+      transition: all 0.3s var(--ease-smooth);
+    }
+
+    .card:hover {
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-lg);
+      border-color: rgba(153, 204, 238, 0.3);
+    }
+
+    .card-stroke {
+      border: 1.5px solid var(--neutral-100);
+      background: white;
+    }
+
+    .card-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: var(--space-md);
+    }
+
+    .card-icon.blue { background: rgba(153, 204, 238, 0.15); color: var(--domo-blue); }
+    .card-icon.orange { background: rgba(255, 153, 34, 0.12); color: var(--accent-orange); }
+    .card-icon.teal { background: rgba(41, 181, 232, 0.12); color: var(--domo-teal); }
+    .card-icon.purple { background: rgba(119, 108, 176, 0.12); color: var(--accent-purple); }
+    .card-icon.mint { background: rgba(173, 212, 193, 0.15); color: #559E38; }
+    .card-icon.navy { background: rgba(10, 41, 83, 0.08); color: var(--domo-navy); }
+
+    .card-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--neutral-900);
+      margin-bottom: var(--space-sm);
+      line-height: 1.3;
+    }
+
+    .card-body {
+      font-size: 14px;
+      color: var(--neutral-600);
+      line-height: 1.6;
+    }
+
+    /* ========================================
+       DELIVERABLE SEPARATOR
+       ======================================== */
+    .deliverable-sep {
+      padding: var(--space-xl) var(--space-3xl);
+      text-align: center;
+    }
+
+    .deliverable-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-sm);
+      padding: 6px 16px;
+      background: var(--neutral-50);
+      border: 1px solid var(--neutral-100);
+      border-radius: 9999px;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--neutral-600);
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+    }
+
+    .deliverable-tag .num {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: var(--domo-blue);
+      color: white;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    /* ========================================
+       DELIVERABLE 1 — EXECUTIVE POSITIONING
+       ======================================== */
+    .positioning-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--space-lg);
+    }
+
+    .persona-card {
+      padding: var(--space-xl);
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--neutral-100);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .persona-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+    }
+
+    .persona-card.technical::before { background: var(--domo-navy); }
+    .persona-card.business::before { background: var(--domo-teal); }
+
+    .persona-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 12px;
+      border-radius: 9999px;
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: var(--space-md);
+    }
+
+    .persona-badge.technical {
+      background: rgba(10, 41, 83, 0.08);
+      color: var(--domo-navy);
+    }
+
+    .persona-badge.business {
+      background: rgba(41, 181, 232, 0.1);
+      color: var(--domo-teal);
+    }
+
+    .persona-card .persona-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--neutral-900);
+      margin-bottom: var(--space-sm);
+    }
+
+    .persona-card .positioning-text {
+      font-size: 16px;
+      line-height: 1.7;
+      color: var(--neutral-600);
+    }
+
+    /* ========================================
+       DELIVERABLE 2 — HERO SECTIONS
+       ======================================== */
+    .hero {
+      position: relative;
+      padding: var(--space-4xl) var(--space-3xl);
+      text-align: center;
+      overflow: hidden;
+    }
+
+    .hero-blue {
+      background: linear-gradient(180deg, var(--domo-blue) 0%, var(--domo-blue-dark) 100%);
+      color: white;
+    }
+
+    .hero-navy {
+      background: linear-gradient(180deg, var(--domo-navy) 0%, #061B3A 100%);
+      color: white;
+    }
+
+    .hero::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      opacity: 0.015;
+      background: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='4' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      pointer-events: none;
+    }
+
+    .hero-content {
+      position: relative;
+      z-index: 1;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    .hero-label {
+      display: inline-block;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      opacity: 0.8;
+      margin-bottom: var(--space-md);
+    }
+
+    .hero .display-xl {
+      margin-bottom: var(--space-lg);
+    }
+
+    .hero .body-xl {
+      opacity: 0.9;
+      max-width: 640px;
+      margin: 0 auto var(--space-xl);
+    }
+
+    .hero .btn-group {
+      justify-content: center;
+    }
+
+    .hero-version-label {
+      position: absolute;
+      top: var(--space-md);
+      right: var(--space-lg);
+      font-size: 12px;
+      font-weight: 600;
+      color: rgba(255,255,255,0.5);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      z-index: 2;
+    }
+
+    /* ========================================
+       DELIVERABLE 3 — CHAMPION SLIDE
+       ======================================== */
+    .slide {
+      background: var(--domo-navy);
+      color: white;
+      padding: var(--space-3xl);
+      border-radius: var(--radius-lg);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .slide::before {
+      content: '';
+      position: absolute;
+      top: -150px;
+      right: -150px;
+      width: 400px;
+      height: 400px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(153,204,238,0.08) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .slide-header {
+      margin-bottom: var(--space-2xl);
+      position: relative;
+    }
+
+    .slide-headline {
+      font-size: clamp(28px, 3vw, 40px);
+      font-weight: 400;
+      line-height: 1.2;
+      letter-spacing: -0.4px;
+      max-width: 700px;
+    }
+
+    .slide-subline {
+      font-size: 16px;
+      color: rgba(255,255,255,0.6);
+      margin-top: var(--space-md);
+      max-width: 600px;
+    }
+
+    .contrast-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--space-md);
+      margin-bottom: var(--space-xl);
+    }
+
+    .contrast-card {
+      padding: var(--space-lg);
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: var(--radius-md);
+      transition: all 0.3s var(--ease-smooth);
+    }
+
+    .contrast-card:hover {
+      background: rgba(255,255,255,0.08);
+      border-color: rgba(153,204,238,0.3);
+    }
+
+    .contrast-label {
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: rgba(255,255,255,0.4);
+      margin-bottom: var(--space-sm);
+    }
+
+    .contrast-before {
+      font-size: 14px;
+      color: rgba(255,255,255,0.5);
+      text-decoration: line-through;
+      margin-bottom: 6px;
+    }
+
+    .contrast-after {
+      font-size: 15px;
+      font-weight: 600;
+      color: white;
+      line-height: 1.5;
+    }
+
+    .contrast-after .highlight {
+      color: var(--domo-blue);
+    }
+
+    .governance-callout {
+      display: flex;
+      align-items: flex-start;
+      gap: var(--space-md);
+      padding: var(--space-lg);
+      background: rgba(153,204,238,0.08);
+      border: 1px solid rgba(153,204,238,0.2);
+      border-radius: var(--radius-md);
+      margin-bottom: var(--space-xl);
+    }
+
+    .governance-icon {
+      flex-shrink: 0;
+      width: 40px;
+      height: 40px;
+      border-radius: var(--radius-md);
+      background: rgba(153,204,238,0.15);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .governance-text {
+      font-size: 15px;
+      line-height: 1.6;
+      color: rgba(255,255,255,0.85);
+    }
+
+    .governance-text strong {
+      color: var(--domo-blue);
+      font-weight: 600;
+    }
+
+    .speaker-notes {
+      padding: var(--space-lg);
+      background: rgba(255,255,255,0.03);
+      border-top: 1px solid rgba(255,255,255,0.08);
+      border-radius: 0 0 var(--radius-md) var(--radius-md);
+      margin-top: var(--space-lg);
+    }
+
+    .speaker-notes-label {
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: rgba(255,255,255,0.3);
+      margin-bottom: var(--space-sm);
+    }
+
+    .speaker-notes p {
+      font-size: 14px;
+      line-height: 1.7;
+      color: rgba(255,255,255,0.5);
+      font-style: italic;
+    }
+
+    /* ========================================
+       ANIMATIONS
+       ======================================== */
+    @keyframes domoFadeInUp {
+      from { opacity: 0; transform: translateY(1.5rem); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .domo-stagger > * {
+      opacity: 0;
+      animation: domoFadeInUp 0.5s var(--ease-out-expo) forwards;
+    }
+    .domo-stagger > *:nth-child(1) { animation-delay: 0.05s; }
+    .domo-stagger > *:nth-child(2) { animation-delay: 0.1s; }
+    .domo-stagger > *:nth-child(3) { animation-delay: 0.15s; }
+    .domo-stagger > *:nth-child(4) { animation-delay: 0.2s; }
+    .domo-stagger > *:nth-child(5) { animation-delay: 0.25s; }
+    .domo-stagger > *:nth-child(6) { animation-delay: 0.3s; }
+
+    /* Focus & Reduced Motion */
+    *:focus-visible {
+      outline: 2px solid var(--domo-blue);
+      outline-offset: 2px;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+
+    /* ========================================
+       RESPONSIVE
+       ======================================== */
+    @media (max-width: 992px) {
+      .positioning-grid { grid-template-columns: 1fr; }
+      .contrast-grid { grid-template-columns: 1fr; }
+      .page-section { padding: var(--space-2xl) var(--space-lg); }
+      .hero { padding: var(--space-3xl) var(--space-lg); }
+      .slide { padding: var(--space-2xl); }
+    }
+
+    @media (max-width: 768px) {
+      .nav-links { display: none; }
+      .hero .display-xl { font-size: 32px; }
+      .btn-group { flex-direction: column; align-items: stretch; }
+      .btn-group .btn { text-align: center; justify-content: center; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ====================================
+       NAVIGATION
+       ==================================== -->
+  <nav class="nav">
+    <div class="nav-inner">
+      <div style="display:flex;align-items:center;gap:12px;">
+        <div class="nav-logo">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 800" width="32" height="32">
+            <path fill="#99CCEE" d="M150.5,328.6c12.4,13.8,21.2,30.9,25,49.8,9.9-48.8,53-85.5,104.7-85.5s94.8,36.8,104.7,85.6v-85.6l106.8,106.8,107.1-106.8v85.6c9.9-48.8,53-85.6,104.7-85.6s79.2,24.8,96.4,60.7V0H0v292.9h70.8c31.7,0,60.1,13.8,79.7,35.7Z"/>
+            <path fill="#99CCEE" d="M703.6,506.6c-51.7,0-94.8-36.8-104.7-85.6v85.6h-36v-127.8l-71.1,71.4-71.4-71.4v127.8h-35.4v-85.6c-9.9,48.8-53,85.6-104.7,85.6s-94.8-36.7-104.7-85.5c-3.8,18.9-12.6,36-25,49.8-19.6,21.9-48,35.7-79.7,35.7H0v293.4h800v-354.2c-17.2,35.9-53.9,60.7-96.4,60.7h0Z"/>
+            <path fill="#99CCEE" d="M280.2,471c39.4,0,71.3-31.9,71.3-71.3s-31.9-71.3-71.3-71.3-71.3,31.9-71.3,71.3,31.9,71.3,71.3,71.3Z"/>
+            <path fill="#99CCEE" d="M142.1,399.7c0-37.8-29.4-68.7-66.6-71.1h-40.1v142.2h40.1c37.2-2.4,66.6-33.3,66.6-71.1h0Z"/>
+            <path fill="#99CCEE" d="M703.6,471c39.4,0,71.3-31.9,71.3-71.3s-31.9-71.3-71.3-71.3-71.3,31.9-71.3,71.3,31.9,71.3,71.3,71.3Z"/>
+            <path fill="#FFF" d="M150.5,470.8c12.4-13.8,21.2-30.9,25-49.8,9.9,48.8,53,85.5,104.7,85.5s94.8-36.8,104.7-85.6v85.6h35.4v-127.8l71.4,71.4,71.1-71.4v127.8h36v-85.6c9.9,48.8,53,85.6,104.7,85.6s79.2-24.8,96.4-60.7v-92.2c-17.2-35.9-53.9-60.7-96.4-60.7s-94.8,36.8-104.7,85.6v-85.6l-107.1,106.8-106.8-106.8v85.6c-9.9-48.8-53-85.6-104.7-85.6s-94.8,36.7-104.7,85.5c-3.8-18.9-12.6-36-25-49.8-19.6-21.9-48-35.7-79.7-35.7H0v213.7h70.8c31.7,0,60.1-13.8,79.7-35.7h0ZM703.6,328.5c39.4,0,71.3,31.9,71.3,71.3s-31.9,71.3-71.3,71.3-71.3-31.9-71.3-71.3,31.9-71.3,71.3-71.3ZM280.2,328.5c39.4,0,71.3,31.9,71.3,71.3s-31.9,71.3-71.3,71.3-71.3-31.9-71.3-71.3,31.9-71.3,71.3-71.3ZM35.4,328.6h40.1c37.2,2.4,66.6,33.3,66.6,71.1s-29.4,68.7-66.6,71.1h-40.1v-142.2h0Z"/>
+          </svg>
+        </div>
+        <span class="nav-title">PMM Writing Test &mdash; Domo Apps</span>
+      </div>
+      <ul class="nav-links">
+        <li><a href="#positioning" class="active">Positioning</a></li>
+        <li><a href="#hero">Hero Sections</a></li>
+        <li><a href="#slide">Champion Slide</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- ====================================
+       DELIVERABLE 1 — EXECUTIVE POSITIONING
+       ==================================== -->
+  <div class="deliverable-sep" id="positioning">
+    <span class="deliverable-tag"><span class="num">1</span> Executive Positioning Statements</span>
+  </div>
+
+  <section class="page-section" style="background: var(--bg-section); padding-top: var(--space-xl);">
+    <div class="content-wrap">
+      <div class="section-title center">
+        <span class="section-label">Internal Use &mdash; Marketing Team</span>
+        <h2 class="h2">Domo Apps Positioning</h2>
+        <p class="body-xl">Concise positioning statements describing the value of Domo Apps for each target persona.</p>
+      </div>
+
+      <div class="positioning-grid domo-stagger">
+        <!-- Technical Persona -->
+        <div class="persona-card technical">
+          <span class="persona-badge technical">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            IT Leader
+          </span>
+          <div class="persona-title">The Technical Persona</div>
+          <p class="positioning-text">
+            Domo Apps consolidates custom application development, governance, and distribution into a single governed platform&mdash;eliminating the tool sprawl and shadow IT that fragment most data ecosystems. With low-code, pro-code, and AI-powered development paths (App Studio, App Dev Framework, and App Catalyst), IT can empower every business unit to build role-specific applications without sacrificing architectural control. Every app&mdash;whether built by a citizen developer or generated via natural language&mdash;automatically inherits existing row-level permissions, column-level masking, and per-user data access policies. The result: business teams move faster while IT maintains a single, composable control plane for data, logic, and security across the enterprise.
+          </p>
+        </div>
+
+        <!-- Non-Technical Persona -->
+        <div class="persona-card business">
+          <span class="persona-badge business">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+            Business Analyst / Citizen Developer
+          </span>
+          <div class="persona-title">The Non-Technical Persona</div>
+          <p class="positioning-text">
+            Domo Apps bridges the gap between data insights and business execution by putting app-building power directly in the hands of the people closest to the work. With App Studio's intuitive low-code tools or App Catalyst's natural-language interface, business analysts can go from idea to interactive, data-powered application in hours&mdash;no developer queue, no stale spreadsheet exports, no waiting on IT. Apps are built on live, governed data from over 1,000 connected sources, so the information is always current and the governance is already built in. It&rsquo;s the fastest path from &ldquo;I wish we had a tool for this&rdquo; to a production-ready app your entire team can use.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ====================================
+       DELIVERABLE 2 — HERO SECTIONS
+       ==================================== -->
+  <div class="deliverable-sep" id="hero">
+    <span class="deliverable-tag"><span class="num">2</span> Web Page Hero Sections</span>
+  </div>
+
+  <!-- Hero Version A — IT Leader Focus -->
+  <section class="hero hero-navy">
+    <span class="hero-version-label">Version A &mdash; IT Leader Focus</span>
+    <div class="hero-content domo-stagger">
+      <span class="hero-label">Domo Apps</span>
+      <h1 class="display-xl">Let your teams build.<br>Keep everything governed.</h1>
+      <p class="body-xl">One platform for low-code, pro-code, and AI-powered app development, where every application automatically inherits your data permissions, security policies, and compliance controls.</p>
+      <div class="btn-group">
+        <a href="#" class="btn btn-primary">See the Architecture</a>
+        <a href="#" class="btn btn-secondary">Talk to Sales</a>
+      </div>
+    </div>
+  </section>
+
+  <div style="height: 32px;"></div>
+
+  <!-- Hero Version B — Business Analyst Focus -->
+  <section class="hero hero-blue">
+    <span class="hero-version-label">Version B &mdash; Business Analyst Focus</span>
+    <div class="hero-content domo-stagger">
+      <span class="hero-label">Domo Apps</span>
+      <h1 class="display-xl">From idea to app.<br>No code. No waiting.</h1>
+      <p class="body-xl">Build interactive, data-powered applications your team actually needs, in hours not months. Describe what you want, and Domo turns it into a production-ready app on live, governed data.</p>
+      <div class="btn-group">
+        <a href="#" class="btn btn-primary">Start Building</a>
+        <a href="#" class="btn btn-secondary">See App Studio</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ====================================
+       DELIVERABLE 3 — INTERNAL CHAMPION SLIDE
+       ==================================== -->
+  <div class="deliverable-sep" id="slide">
+    <span class="deliverable-tag"><span class="num">3</span> Sales Enablement &mdash; Internal Champion Slide</span>
+  </div>
+
+  <section class="page-section">
+    <div class="content-wrap">
+      <div class="section-title">
+        <span class="section-label">Slide Context</span>
+        <p class="body-m" style="color:var(--neutral-600); max-width: 700px;">A single presentation slide designed for a Business Analyst to &ldquo;sell&rdquo; the idea of Domo Apps to their IT Leader. Addresses governance concerns and contrasts with current alternatives.</p>
+      </div>
+
+      <div class="slide">
+        <!-- Slide Header -->
+        <div class="slide-header">
+          <h2 class="slide-headline">
+            Stop choosing between speed and governance.<br>
+            <span style="color: var(--domo-blue);">Domo Apps gives your teams both.</span>
+          </h2>
+          <p class="slide-subline">Custom data applications built on the data you already govern. No new infrastructure, no security gaps, no developer backlog.</p>
+        </div>
+
+        <!-- 4 Contrast Cards -->
+        <div class="contrast-grid domo-stagger">
+          <div class="contrast-card">
+            <div class="contrast-label">vs. Spreadsheet Workflows</div>
+            <div class="contrast-before">Ungoverned Excel files with stale data, VBA security risks, and no audit trail</div>
+            <div class="contrast-after">Interactive apps on <span class="highlight">live, governed data</span>. Always current, always compliant, always auditable</div>
+          </div>
+
+          <div class="contrast-card">
+            <div class="contrast-label">vs. Static Dashboards</div>
+            <div class="contrast-before">Passive views that 72% of users bypass by exporting to Excel anyway</div>
+            <div class="contrast-after">Actionable apps with <span class="highlight">write-back, embedded workflows</span>, and role-specific experiences that drive execution</div>
+          </div>
+
+          <div class="contrast-card">
+            <div class="contrast-label">vs. Custom-Coded Tools</div>
+            <div class="contrast-before">Custom builds that take months and need constant engineer maintenance</div>
+            <div class="contrast-after">Production-ready apps in <span class="highlight">hours, not months</span>&mdash;with low-code, pro-code, or AI-assisted development paths</div>
+          </div>
+
+          <div class="contrast-card">
+            <div class="contrast-label">vs. Shadow IT &amp; Rogue Tools</div>
+            <div class="contrast-before">73% of workers using unapproved tools because &ldquo;business moves faster than IT can approve&rdquo;</div>
+            <div class="contrast-after">Business gets <span class="highlight">self-service speed</span>; IT gets <span class="highlight">centralized governance</span>. Both sides win.</div>
+          </div>
+        </div>
+
+        <!-- Governance Reassurance -->
+        <div class="governance-callout">
+          <div class="governance-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#99CCEE" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          </div>
+          <div class="governance-text">
+            <strong>IT stays in control:</strong> Every Domo App, whether built with low-code App Studio, AI-powered App Catalyst, or custom pro-code, automatically inherits your existing data permissions (row-level PDP, column-level masking, per-user access). No new governance to build. No security gaps to close.
+          </div>
+        </div>
+
+        <!-- Speaker Notes -->
+        <div class="speaker-notes">
+          <div class="speaker-notes-label">Speaker Notes</div>
+          <p>
+            &ldquo;We&rsquo;re spending [X hours per week] maintaining spreadsheet workflows that are ungoverned, error-prone, and invisible to IT. Domo Apps lets us build what our team needs on top of the data you've already secured, with no new data copies and no developer time required. The apps automatically inherit your existing PDP rules and access controls, so there&rsquo;s nothing new to manage on your end. It&rsquo;s the fastest way to eliminate our shadow IT problem while actually reducing your backlog.&rdquo;
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ====================================
+       FOOTER
+       ==================================== -->
+  <footer style="padding: var(--space-2xl) var(--space-3xl); text-align: center; border-top: 1px solid var(--neutral-100);">
+    <p class="body-s" style="color: var(--neutral-200);">
+      Domo PMM Writing Test &mdash; Noah Boone &mdash; March 2026
+    </p>
+  </footer>
+
+<script>
+  (function() {
+    var params = new URLSearchParams(window.location.search);
+    var show = params.get('show');
+    if (!show) return;
+    var ids = ['positioning', 'hero', 'slide'];
+    var idx = ids.indexOf(show);
+    if (idx === -1) return;
+    var startId = ids[idx];
+    var endId = ids[idx + 1] || null;
+    // Hide everything first
+    var children = Array.from(document.body.children);
+    children.forEach(function(c) { c.style.display = 'none'; });
+    // Show elements between start and end
+    var showing = false;
+    children.forEach(function(child) {
+      if (child.id === startId) showing = true;
+      if (endId && child.id === endId) showing = false;
+      if (showing) {
+        child.style.display = '';
+        // Hide the deliverable-sep header bar itself for cleaner embed
+        if (child.classList && child.classList.contains('deliverable-sep')) {
+          child.style.display = 'none';
+        }
+      }
+    });
+    document.body.style.paddingTop = '0';
+    document.body.style.overflow = 'auto';
+  })();
+</script>
+</body>
+</html>

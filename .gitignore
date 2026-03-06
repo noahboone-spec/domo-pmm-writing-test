@@ -1,0 +1,5 @@
+Dockerfile
+nginx.conf
+CLAUDE.md
+.DS_Store
+*.log

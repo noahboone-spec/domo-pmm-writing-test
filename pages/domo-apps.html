@@ -1,0 +1,1385 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Domo Apps — Build Custom Business Apps on Governed Data</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    /* ===== DOMO DESIGN TOKENS ===== */
+    :root {
+      --domo-blue: #99CCEE;
+      --domo-blue-dark: #7BB8E0;
+      --accent-orange: #FF9922;
+      --accent-orange-hover: #E8891F;
+      --neutral-50: #F1F6FA;
+      --neutral-100: #DCE4EA;
+      --neutral-200: #B7C1CB;
+      --neutral-600: #68737F;
+      --neutral-900: #3F454D;
+      --accent-purple: #776CB0;
+      --accent-mint: #ADD4C1;
+      --font-primary: 'Open Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      --shadow-sm: 0 1px 3px rgba(63,69,77,0.08), 0 1px 2px rgba(63,69,77,0.06);
+      --shadow-md: 0 4px 12px rgba(63,69,77,0.1), 0 2px 4px rgba(63,69,77,0.06);
+      --shadow-lg: 0 8px 20px rgba(63,69,77,0.08), 0 4px 8px rgba(63,69,77,0.04);
+      --shadow-blue-glow: 0 4px 20px rgba(153, 204, 238, 0.3);
+      --shadow-orange-glow: 0 4px 20px rgba(255, 153, 34, 0.3);
+      --radius-sm: 6px;
+      --radius-md: 8px;
+      --radius-lg: 12px;
+      --ease-smooth: cubic-bezier(0.83, 0, 0.17, 1);
+      --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+      --content-width: 1152px;
+      --page-width: 1280px;
+    }
+
+    /* ===== RESET ===== */
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: var(--font-primary);
+      color: var(--neutral-900);
+      background: #fff;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      line-height: 1.6;
+    }
+    img { max-width: 100%; display: block; }
+    a { text-decoration: none; color: inherit; }
+
+    /* ===== ANIMATIONS ===== */
+    @keyframes domoFadeInUp {
+      from { opacity: 0; transform: translateY(1.5rem); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes domoFadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    @keyframes domoShimmer {
+      from { background-position: -200% 0; }
+      to { background-position: 200% 0; }
+    }
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-8px); }
+    }
+    @keyframes pulseRing {
+      0% { transform: scale(1); opacity: 0.4; }
+      100% { transform: scale(1.6); opacity: 0; }
+    }
+
+    .animate-on-scroll {
+      opacity: 0;
+      transform: translateY(1.5rem);
+      transition: opacity 0.6s var(--ease-out-expo), transform 0.6s var(--ease-out-expo);
+    }
+    .animate-on-scroll.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .stagger > .animate-on-scroll:nth-child(1) { transition-delay: 0.05s; }
+    .stagger > .animate-on-scroll:nth-child(2) { transition-delay: 0.1s; }
+    .stagger > .animate-on-scroll:nth-child(3) { transition-delay: 0.15s; }
+    .stagger > .animate-on-scroll:nth-child(4) { transition-delay: 0.2s; }
+    .stagger > .animate-on-scroll:nth-child(5) { transition-delay: 0.25s; }
+    .stagger > .animate-on-scroll:nth-child(6) { transition-delay: 0.3s; }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+      .animate-on-scroll { opacity: 1; transform: none; }
+    }
+
+    /* ===== FOCUS ===== */
+    *:focus-visible {
+      outline: 2px solid var(--domo-blue);
+      outline-offset: 2px;
+    }
+
+    /* ===== NAVIGATION ===== */
+    .nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 100;
+      background: rgba(255,255,255,0.92);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--neutral-100);
+      transition: box-shadow 0.3s var(--ease-smooth);
+    }
+    .nav.scrolled {
+      box-shadow: var(--shadow-md);
+    }
+    .nav-inner {
+      max-width: var(--page-width);
+      margin: 0 auto;
+      padding: 0 2rem;
+      height: 64px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .nav-logo { height: 36px; width: auto; }
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 2rem;
+      list-style: none;
+    }
+    .nav-links a {
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--neutral-600);
+      transition: color 0.3s var(--ease-smooth);
+    }
+    .nav-links a:hover { color: var(--neutral-900); }
+    .nav-cta {
+      padding: 0.5rem 1.25rem;
+      background: var(--accent-orange);
+      color: #fff !important;
+      border-radius: var(--radius-md);
+      font-weight: 600;
+      font-size: 0.875rem;
+      transition: all 0.3s var(--ease-smooth);
+    }
+    .nav-cta:hover {
+      background: var(--accent-orange-hover);
+      box-shadow: var(--shadow-orange-glow);
+      transform: translateY(-1px);
+    }
+    .nav-mobile-toggle {
+      display: none;
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 0.5rem;
+    }
+    .nav-mobile-toggle span {
+      display: block;
+      width: 22px;
+      height: 2px;
+      background: var(--neutral-900);
+      margin: 5px 0;
+      transition: all 0.3s var(--ease-smooth);
+    }
+
+    /* ===== HERO ===== */
+    .hero {
+      position: relative;
+      padding: 10rem 2rem 6rem;
+      background: linear-gradient(180deg, var(--domo-blue) 0%, var(--domo-blue-dark) 100%);
+      overflow: hidden;
+      text-align: center;
+    }
+    .hero::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      opacity: 0.02;
+      background: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='4' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      pointer-events: none;
+    }
+    .hero-bg-shapes {
+      position: absolute;
+      inset: 0;
+      overflow: hidden;
+      pointer-events: none;
+    }
+    .hero-bg-shapes .shape {
+      position: absolute;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.06);
+    }
+    .hero-bg-shapes .shape-1 { width: 600px; height: 600px; top: -200px; right: -100px; }
+    .hero-bg-shapes .shape-2 { width: 400px; height: 400px; bottom: -150px; left: -80px; }
+    .hero-bg-shapes .shape-3 { width: 200px; height: 200px; top: 40%; left: 10%; }
+    .hero-content {
+      position: relative;
+      z-index: 1;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    .hero-label {
+      display: inline-block;
+      padding: 0.375rem 1rem;
+      background: rgba(255,255,255,0.15);
+      border: 1px solid rgba(255,255,255,0.25);
+      border-radius: 999px;
+      color: #fff;
+      font-size: 0.8125rem;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      margin-bottom: 1.5rem;
+      animation: domoFadeIn 0.6s var(--ease-out-expo) 0.1s both;
+    }
+    .hero h1 {
+      font-size: clamp(2.5rem, 6vw, 4rem);
+      font-weight: 800;
+      color: #fff;
+      line-height: 1.1;
+      letter-spacing: -0.02em;
+      margin-bottom: 1.25rem;
+      animation: domoFadeInUp 0.7s var(--ease-out-expo) 0.2s both;
+    }
+    .hero p {
+      font-size: clamp(1.0625rem, 2vw, 1.25rem);
+      font-weight: 300;
+      color: rgba(255,255,255,0.9);
+      line-height: 1.6;
+      max-width: 620px;
+      margin: 0 auto 2rem;
+      animation: domoFadeInUp 0.7s var(--ease-out-expo) 0.35s both;
+    }
+    .hero-ctas {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      flex-wrap: wrap;
+      animation: domoFadeInUp 0.7s var(--ease-out-expo) 0.5s both;
+    }
+    .btn-primary {
+      padding: 0.875rem 2rem;
+      background: var(--accent-orange);
+      color: #fff;
+      border: none;
+      border-radius: var(--radius-md);
+      font-family: var(--font-primary);
+      font-weight: 700;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: all 0.3s var(--ease-smooth);
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .btn-primary:hover {
+      background: var(--accent-orange-hover);
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-orange-glow);
+    }
+    .btn-secondary {
+      padding: 0.875rem 2rem;
+      background: transparent;
+      color: #fff;
+      border: 2px solid rgba(255,255,255,0.4);
+      border-radius: var(--radius-md);
+      font-family: var(--font-primary);
+      font-weight: 600;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: all 0.3s var(--ease-smooth);
+    }
+    .btn-secondary:hover {
+      background: rgba(255,255,255,0.1);
+      border-color: rgba(255,255,255,0.7);
+    }
+
+    /* ===== SUBNAV ===== */
+    .subnav {
+      position: sticky;
+      top: 64px;
+      z-index: 90;
+      background: #fff;
+      border-bottom: 1px solid var(--neutral-100);
+    }
+    .subnav-inner {
+      max-width: var(--content-width);
+      margin: 0 auto;
+      padding: 0 2rem;
+      display: flex;
+      gap: 0;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+    .subnav-inner::-webkit-scrollbar { display: none; }
+    .subnav a {
+      padding: 1rem 1.5rem;
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--neutral-600);
+      white-space: nowrap;
+      border-bottom: 2px solid transparent;
+      transition: all 0.3s var(--ease-smooth);
+    }
+    .subnav a:hover,
+    .subnav a.active {
+      color: var(--neutral-900);
+      border-bottom-color: var(--domo-blue);
+    }
+
+    /* ===== SECTION BASE ===== */
+    .section {
+      padding: 5rem 2rem;
+    }
+    .section-inner {
+      max-width: var(--content-width);
+      margin: 0 auto;
+    }
+    .section-label {
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--domo-blue);
+      margin-bottom: 0.75rem;
+    }
+    .section-title {
+      font-size: clamp(1.75rem, 4vw, 2.5rem);
+      font-weight: 700;
+      color: var(--neutral-900);
+      line-height: 1.15;
+      margin-bottom: 1rem;
+      letter-spacing: -0.01em;
+    }
+    .section-subtitle {
+      font-size: clamp(1rem, 1.5vw, 1.125rem);
+      font-weight: 400;
+      color: var(--neutral-600);
+      max-width: 640px;
+      line-height: 1.6;
+    }
+    .section-header {
+      margin-bottom: 3rem;
+    }
+    .section-header.center {
+      text-align: center;
+    }
+    .section-header.center .section-subtitle {
+      margin: 0 auto;
+    }
+    .bg-light { background: var(--neutral-50); }
+    .bg-white { background: #fff; }
+
+    /* ===== PROBLEM SECTION ===== */
+    .problem-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.5rem;
+    }
+    .problem-card {
+      background: #fff;
+      border: 1px solid var(--neutral-100);
+      border-radius: var(--radius-lg);
+      padding: 2rem;
+      transition: all 0.3s var(--ease-smooth);
+    }
+    .problem-card:hover {
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-lg);
+      border-color: rgba(153, 204, 238, 0.3);
+    }
+    .problem-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: var(--radius-md);
+      background: var(--neutral-50);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 1.25rem;
+    }
+    .problem-icon svg { width: 24px; height: 24px; stroke: var(--neutral-600); }
+    .problem-card h3 {
+      font-size: 1.125rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+      color: var(--neutral-900);
+    }
+    .problem-card p {
+      font-size: 0.9375rem;
+      color: var(--neutral-600);
+      line-height: 1.6;
+    }
+    .problem-stat {
+      display: inline-block;
+      margin-top: 0.75rem;
+      padding: 0.25rem 0.625rem;
+      background: rgba(255, 153, 34, 0.08);
+      border-radius: var(--radius-sm);
+      font-size: 0.8125rem;
+      font-weight: 600;
+      color: var(--accent-orange);
+    }
+
+    /* ===== SOLUTION SECTION ===== */
+    .solution-hero {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4rem;
+      align-items: center;
+    }
+    .solution-text .section-label { margin-bottom: 0.75rem; }
+    .solution-text h2 {
+      font-size: clamp(1.75rem, 3.5vw, 2.25rem);
+      font-weight: 700;
+      line-height: 1.2;
+      margin-bottom: 1rem;
+      color: var(--neutral-900);
+    }
+    .solution-text p {
+      font-size: 1.0625rem;
+      color: var(--neutral-600);
+      line-height: 1.7;
+      margin-bottom: 1.5rem;
+    }
+    .solution-points {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+    .solution-points li {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.75rem;
+      font-size: 0.9375rem;
+      color: var(--neutral-600);
+    }
+    .solution-points li .check {
+      flex-shrink: 0;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: rgba(153, 204, 238, 0.15);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: 2px;
+    }
+    .solution-points li .check svg { width: 12px; height: 12px; stroke: var(--domo-blue); }
+    .solution-visual {
+      position: relative;
+    }
+    .solution-graphic {
+      background: linear-gradient(135deg, var(--neutral-50) 0%, #e8f0f7 100%);
+      border-radius: var(--radius-lg);
+      padding: 2.5rem;
+      border: 1px solid var(--neutral-100);
+      position: relative;
+      overflow: hidden;
+    }
+    .solution-graphic::after {
+      content: '';
+      position: absolute;
+      top: -40%;
+      right: -20%;
+      width: 300px;
+      height: 300px;
+      background: radial-gradient(circle, rgba(153,204,238,0.15) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .graphic-layers {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      position: relative;
+      z-index: 1;
+    }
+    .graphic-layer {
+      background: #fff;
+      border: 1px solid var(--neutral-100);
+      border-radius: var(--radius-md);
+      padding: 1rem 1.25rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      box-shadow: var(--shadow-sm);
+      transition: all 0.3s var(--ease-smooth);
+    }
+    .graphic-layer:hover {
+      transform: translateX(4px);
+      box-shadow: var(--shadow-md);
+    }
+    .graphic-layer-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .graphic-layer-icon svg { width: 18px; height: 18px; }
+    .graphic-layer-icon.blue { background: rgba(153, 204, 238, 0.15); }
+    .graphic-layer-icon.blue svg { stroke: var(--domo-blue); }
+    .graphic-layer-icon.orange { background: rgba(255, 153, 34, 0.1); }
+    .graphic-layer-icon.orange svg { stroke: var(--accent-orange); }
+    .graphic-layer-icon.purple { background: rgba(119, 108, 176, 0.1); }
+    .graphic-layer-icon.purple svg { stroke: var(--accent-purple); }
+    .graphic-layer-icon.mint { background: rgba(173, 212, 193, 0.15); }
+    .graphic-layer-icon.mint svg { stroke: #5a9e7a; }
+    .graphic-layer-text { font-size: 0.875rem; font-weight: 600; color: var(--neutral-900); }
+    .graphic-layer-sub { font-size: 0.75rem; color: var(--neutral-600); font-weight: 400; }
+    .graphic-connector {
+      width: 2px;
+      height: 12px;
+      background: var(--neutral-100);
+      margin-left: 2.25rem;
+    }
+
+    /* ===== BUILD PATHS ===== */
+    .paths-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.5rem;
+    }
+    .path-card {
+      background: #fff;
+      border: 1px solid var(--neutral-100);
+      border-radius: var(--radius-lg);
+      padding: 2rem;
+      box-shadow: var(--shadow-sm);
+      transition: all 0.3s var(--ease-smooth);
+      position: relative;
+      overflow: hidden;
+    }
+    .path-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+    }
+    .path-card.low-code::before { background: var(--domo-blue); }
+    .path-card.ai-code::before { background: var(--accent-orange); }
+    .path-card.pro-code::before { background: var(--accent-purple); }
+    .path-card:hover {
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-lg);
+    }
+    .path-badge {
+      display: inline-block;
+      padding: 0.25rem 0.625rem;
+      border-radius: var(--radius-sm);
+      font-size: 0.6875rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 1rem;
+    }
+    .path-card.low-code .path-badge { background: rgba(153, 204, 238, 0.15); color: #5a8fad; }
+    .path-card.ai-code .path-badge { background: rgba(255, 153, 34, 0.1); color: var(--accent-orange); }
+    .path-card.pro-code .path-badge { background: rgba(119, 108, 176, 0.1); color: var(--accent-purple); }
+    .path-card h3 {
+      font-size: 1.25rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+      color: var(--neutral-900);
+    }
+    .path-card > p {
+      font-size: 0.9375rem;
+      color: var(--neutral-600);
+      line-height: 1.6;
+      margin-bottom: 1.25rem;
+    }
+    .path-features {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      margin-bottom: 1.5rem;
+    }
+    .path-features li {
+      font-size: 0.8125rem;
+      color: var(--neutral-600);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .path-features li::before {
+      content: '';
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .path-card.low-code .path-features li::before { background: var(--domo-blue); }
+    .path-card.ai-code .path-features li::before { background: var(--accent-orange); }
+    .path-card.pro-code .path-features li::before { background: var(--accent-purple); }
+    .path-card .path-link {
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--accent-orange);
+      display: inline-flex;
+      align-items: center;
+      gap: 0.375rem;
+      transition: gap 0.3s var(--ease-smooth);
+    }
+    .path-card .path-link:hover { gap: 0.625rem; }
+    .path-link svg { width: 16px; height: 16px; stroke: var(--accent-orange); }
+
+    /* ===== STATS ===== */
+    .stats-section { background: var(--neutral-50); }
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 2rem;
+    }
+    .stat-item {
+      text-align: center;
+    }
+    .stat-number {
+      font-size: clamp(2.5rem, 5vw, 3.5rem);
+      font-weight: 300;
+      color: var(--domo-blue);
+      line-height: 1;
+      margin-bottom: 0.5rem;
+    }
+    .stat-label {
+      font-size: 0.875rem;
+      font-weight: 400;
+      color: var(--neutral-600);
+      line-height: 1.4;
+    }
+    .stat-source {
+      font-size: 0.6875rem;
+      color: var(--neutral-200);
+      margin-top: 0.25rem;
+    }
+
+    /* ===== GOVERNANCE ===== */
+    .governance-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4rem;
+      align-items: center;
+    }
+    .governance-text h2 {
+      font-size: clamp(1.75rem, 3.5vw, 2.25rem);
+      font-weight: 700;
+      line-height: 1.2;
+      margin-bottom: 1rem;
+      color: var(--neutral-900);
+    }
+    .governance-text p {
+      font-size: 1.0625rem;
+      color: var(--neutral-600);
+      line-height: 1.7;
+      margin-bottom: 1.5rem;
+    }
+    .governance-badges {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-top: 1.5rem;
+    }
+    .governance-badge {
+      padding: 0.375rem 0.75rem;
+      background: var(--neutral-50);
+      border: 1px solid var(--neutral-100);
+      border-radius: 999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--neutral-600);
+    }
+    .governance-features {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+    .gov-feature {
+      background: #fff;
+      border: 1px solid var(--neutral-100);
+      border-radius: var(--radius-lg);
+      padding: 1.5rem;
+      box-shadow: var(--shadow-sm);
+      transition: all 0.3s var(--ease-smooth);
+    }
+    .gov-feature:hover {
+      box-shadow: var(--shadow-md);
+    }
+    .gov-feature-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: var(--radius-md);
+      background: rgba(153, 204, 238, 0.12);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 0.75rem;
+    }
+    .gov-feature-icon svg { width: 20px; height: 20px; stroke: var(--domo-blue); }
+    .gov-feature h4 {
+      font-size: 0.9375rem;
+      font-weight: 700;
+      margin-bottom: 0.25rem;
+      color: var(--neutral-900);
+    }
+    .gov-feature p {
+      font-size: 0.8125rem;
+      color: var(--neutral-600);
+      line-height: 1.5;
+    }
+
+    /* ===== TESTIMONIALS ===== */
+    .testimonials-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.5rem;
+    }
+    .testimonial-card {
+      background: #fff;
+      border: 1px solid var(--neutral-100);
+      border-radius: var(--radius-lg);
+      padding: 2rem;
+      box-shadow: var(--shadow-sm);
+      transition: all 0.3s var(--ease-smooth);
+    }
+    .testimonial-card:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
+    }
+    .testimonial-stars {
+      display: flex;
+      gap: 2px;
+      margin-bottom: 1rem;
+    }
+    .testimonial-stars svg { width: 16px; height: 16px; fill: var(--accent-orange); }
+    .testimonial-quote {
+      font-size: 0.9375rem;
+      color: var(--neutral-600);
+      line-height: 1.7;
+      font-style: italic;
+      margin-bottom: 1.25rem;
+    }
+    .testimonial-source {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--neutral-200);
+    }
+    .testimonial-source span {
+      display: block;
+      margin-top: 0.125rem;
+      font-weight: 400;
+    }
+    .review-badges {
+      display: flex;
+      justify-content: center;
+      gap: 2.5rem;
+      margin-top: 3rem;
+      padding-top: 2rem;
+      border-top: 1px solid var(--neutral-100);
+    }
+    .review-badge {
+      text-align: center;
+    }
+    .review-badge-score {
+      font-size: 1.75rem;
+      font-weight: 300;
+      color: var(--domo-blue);
+    }
+    .review-badge-stars {
+      display: flex;
+      gap: 1px;
+      justify-content: center;
+      margin: 0.25rem 0;
+    }
+    .review-badge-stars svg { width: 12px; height: 12px; fill: var(--accent-orange); }
+    .review-badge-name {
+      font-size: 0.75rem;
+      color: var(--neutral-600);
+      font-weight: 600;
+    }
+    .review-badge-count {
+      font-size: 0.6875rem;
+      color: var(--neutral-200);
+    }
+
+    /* ===== FINAL CTA ===== */
+    .final-cta {
+      background: linear-gradient(180deg, var(--domo-blue) 0%, var(--domo-blue-dark) 100%);
+      padding: 5rem 2rem;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .final-cta::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      opacity: 0.015;
+      background: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='4' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      pointer-events: none;
+    }
+    .final-cta-inner {
+      position: relative;
+      z-index: 1;
+      max-width: 640px;
+      margin: 0 auto;
+    }
+    .final-cta h2 {
+      font-size: clamp(1.75rem, 4vw, 2.5rem);
+      font-weight: 800;
+      color: #fff;
+      line-height: 1.15;
+      margin-bottom: 1rem;
+    }
+    .final-cta p {
+      font-size: 1.0625rem;
+      font-weight: 300;
+      color: rgba(255,255,255,0.9);
+      margin-bottom: 2rem;
+      line-height: 1.6;
+    }
+    .final-cta .btn-primary {
+      font-size: 1.0625rem;
+      padding: 1rem 2.5rem;
+    }
+
+    /* ===== FOOTER ===== */
+    .footer {
+      background: var(--neutral-900);
+      padding: 3rem 2rem 2rem;
+    }
+    .footer-inner {
+      max-width: var(--content-width);
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .footer-logo { height: 32px; opacity: 0.7; }
+    .footer-links {
+      display: flex;
+      gap: 2rem;
+      list-style: none;
+    }
+    .footer-links a {
+      font-size: 0.8125rem;
+      color: rgba(255,255,255,0.5);
+      transition: color 0.3s var(--ease-smooth);
+    }
+    .footer-links a:hover { color: rgba(255,255,255,0.8); }
+    .footer-copy {
+      font-size: 0.75rem;
+      color: rgba(255,255,255,0.3);
+      text-align: center;
+      margin-top: 2rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid rgba(255,255,255,0.08);
+      max-width: var(--content-width);
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    /* ===== RESPONSIVE ===== */
+    @media (max-width: 992px) {
+      .problem-grid { grid-template-columns: repeat(2, 1fr); }
+      .solution-hero { grid-template-columns: 1fr; gap: 2.5rem; }
+      .solution-visual { order: -1; }
+      .governance-grid { grid-template-columns: 1fr; gap: 2.5rem; }
+      .stats-grid { grid-template-columns: repeat(2, 1fr); }
+      .testimonials-grid { grid-template-columns: 1fr 1fr; }
+    }
+    @media (max-width: 768px) {
+      .nav-links { display: none; }
+      .nav-mobile-toggle { display: block; }
+      .hero { padding: 8rem 1.5rem 4rem; }
+      .section { padding: 3.5rem 1.5rem; }
+      .problem-grid { grid-template-columns: 1fr; }
+      .paths-grid { grid-template-columns: 1fr; }
+      .stats-grid { grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+      .governance-features { grid-template-columns: 1fr; }
+      .testimonials-grid { grid-template-columns: 1fr; }
+      .review-badges { flex-direction: column; gap: 1.5rem; align-items: center; }
+      .footer-inner { flex-direction: column; gap: 1.5rem; text-align: center; }
+      .footer-links { flex-wrap: wrap; justify-content: center; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav class="nav" id="nav">
+    <div class="nav-inner">
+      <a href="#" aria-label="Domo Home">
+        <svg class="nav-logo" viewBox="0 0 800 800" height="36">
+          <path fill="#99CCEE" d="M150.5,328.6c12.4,13.8,21.2,30.9,25,49.8,9.9-48.8,53-85.5,104.7-85.5s94.8,36.8,104.7,85.6v-85.6l106.8,106.8,107.1-106.8v85.6c9.9-48.8,53-85.6,104.7-85.6s79.2,24.8,96.4,60.7V0H0v292.9h70.8c31.7,0,60.1,13.8,79.7,35.7Z"/>
+          <path fill="#99CCEE" d="M703.6,506.6c-51.7,0-94.8-36.8-104.7-85.6v85.6h-36v-127.8l-71.1,71.4-71.4-71.4v127.8h-35.4v-85.6c-9.9,48.8-53,85.6-104.7,85.6s-94.8-36.7-104.7-85.5c-3.8,18.9-12.6,36-25,49.8-19.6,21.9-48,35.7-79.7,35.7H0v293.4h800v-354.2c-17.2,35.9-53.9,60.7-96.4,60.7h0Z"/>
+          <path fill="#99CCEE" d="M280.2,471c39.4,0,71.3-31.9,71.3-71.3s-31.9-71.3-71.3-71.3-71.3,31.9-71.3,71.3,31.9,71.3,71.3,71.3Z"/>
+          <path fill="#99CCEE" d="M142.1,399.7c0-37.8-29.4-68.7-66.6-71.1h-40.1v142.2h40.1c37.2-2.4,66.6-33.3,66.6-71.1h0Z"/>
+          <path fill="#99CCEE" d="M703.6,471c39.4,0,71.3-31.9,71.3-71.3s-31.9-71.3-71.3-71.3-71.3,31.9-71.3,71.3,31.9,71.3,71.3,71.3Z"/>
+          <path fill="#FFF" d="M150.5,470.8c12.4-13.8,21.2-30.9,25-49.8,9.9,48.8,53,85.5,104.7,85.5s94.8-36.8,104.7-85.6v85.6h35.4v-127.8l71.4,71.4,71.1-71.4v127.8h36v-85.6c9.9,48.8,53,85.6,104.7,85.6s79.2-24.8,96.4-60.7v-92.2c-17.2-35.9-53.9-60.7-96.4-60.7s-94.8,36.8-104.7,85.6v-85.6l-107.1,106.8-106.8-106.8v85.6c-9.9-48.8-53-85.6-104.7-85.6s-94.8,36.7-104.7,85.5c-3.8-18.9-12.6-36-25-49.8-19.6-21.9-48-35.7-79.7-35.7H0v213.7h70.8c31.7,0,60.1-13.8,79.7-35.7h0ZM703.6,328.5c39.4,0,71.3,31.9,71.3,71.3s-31.9,71.3-71.3,71.3-71.3-31.9-71.3-71.3,31.9-71.3,71.3-71.3ZM280.2,328.5c39.4,0,71.3,31.9,71.3,71.3s-31.9,71.3-71.3,71.3-71.3-31.9-71.3-71.3,31.9-71.3,71.3-71.3ZM35.4,328.6h40.1c37.2,2.4,66.6,33.3,66.6,71.1s-29.4,68.7-66.6,71.1h-40.1v-142.2h0Z"/>
+        </svg>
+      </a>
+      <ul class="nav-links">
+        <li><a href="#problems">Why Apps</a></li>
+        <li><a href="#solution">Platform</a></li>
+        <li><a href="#paths">Build Paths</a></li>
+        <li><a href="#governance">Governance</a></li>
+        <li><a href="#testimonials">Reviews</a></li>
+        <li><a href="#demo" class="nav-cta">Request a Demo</a></li>
+      </ul>
+      <button class="nav-mobile-toggle" aria-label="Toggle navigation">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero" id="hero">
+    <div class="hero-bg-shapes">
+      <div class="shape shape-1"></div>
+      <div class="shape shape-2"></div>
+      <div class="shape shape-3"></div>
+    </div>
+    <div class="hero-content">
+      <span class="hero-label">Domo Apps</span>
+      <h1>Build custom apps on data you already trust</h1>
+      <p>Go beyond traditional dashboards. Deliver business-critical, role-specific applications to front-line workers using low-code, AI, or pro-code tools on a single governed platform.</p>
+      <div class="hero-ctas">
+        <a href="#demo" class="btn-primary">Request a Demo <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></a>
+        <a href="#paths" class="btn-secondary">See How It Works</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- SUBNAV -->
+  <nav class="subnav" id="subnav">
+    <div class="subnav-inner">
+      <a href="#problems">The Problem</a>
+      <a href="#solution">The Platform</a>
+      <a href="#paths">Build Paths</a>
+      <a href="#stats">By the Numbers</a>
+      <a href="#governance">Governance</a>
+      <a href="#testimonials">Reviews</a>
+    </div>
+  </nav>
+
+  <!-- PROBLEMS -->
+  <section class="section bg-white" id="problems">
+    <div class="section-inner">
+      <div class="section-header center animate-on-scroll">
+        <div class="section-label">The Problem</div>
+        <h2 class="section-title">Your teams need apps.<br>Your current options all fall short.</h2>
+        <p class="section-subtitle">Spreadsheets lack governance. Dashboards lack interaction. Custom-coded tools cost too much and take too long. Shadow IT fills the gap and creates risk.</p>
+      </div>
+      <div class="problem-grid stagger">
+        <div class="problem-card animate-on-scroll">
+          <div class="problem-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M3 15h18"/><path d="M9 3v18"/><path d="M15 3v18"/></svg>
+          </div>
+          <h3>Spreadsheet Chaos</h3>
+          <p>Excel "apps" bypass governance, break at scale, and create security nightmares. Your teams juggle 11+ tools daily.</p>
+          <span class="problem-stat">10+ hrs/week lost to app switching</span>
+        </div>
+        <div class="problem-card animate-on-scroll">
+          <div class="problem-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 16l4-8 4 4 4-8"/></svg>
+          </div>
+          <h3>Static Dashboards</h3>
+          <p>Passive views that nobody acts on. Most users bypass dashboards entirely and export to Excel for the analysis they actually need.</p>
+          <span class="problem-stat">72% bypass dashboards to export data</span>
+        </div>
+        <div class="problem-card animate-on-scroll">
+          <div class="problem-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/><line x1="12" y1="2" x2="12" y2="22"/></svg>
+          </div>
+          <h3>Custom Code Costs</h3>
+          <p>Building bespoke internal tools takes weeks or months and requires constant engineer maintenance. It's a resource drain most teams can't afford to sustain.</p>
+          <span class="problem-stat">78% plan to build more custom tools in 2026</span>
+        </div>
+        <div class="problem-card animate-on-scroll">
+          <div class="problem-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
+          </div>
+          <h3>Shadow IT Risk</h3>
+          <p>73% of workers use unapproved tools because approved ones are too slow or rigid. Business moves faster than IT systems can adapt.</p>
+          <span class="problem-stat">90% concerned about shadow AI security</span>
+        </div>
+        <div class="problem-card animate-on-scroll">
+          <div class="problem-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+          </div>
+          <h3>IT Bottlenecks</h3>
+          <p>Every business request joins the queue. Business users wait weeks for simple changes. IT teams drown in a backlog that never shrinks.</p>
+          <span class="problem-stat">Avg. request wait: weeks to months</span>
+        </div>
+        <div class="problem-card animate-on-scroll">
+          <div class="problem-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><path d="M3.27 6.96 12 12.01l8.73-5.05"/><path d="M12 22.08V12"/></svg>
+          </div>
+          <h3>Tool Sprawl</h3>
+          <p>Disconnected systems, multiple definitions of truth, inconsistent governance. Tools that work in isolation but fail at scale.</p>
+          <span class="problem-stat">70% use shadow analytics tools</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SOLUTION -->
+  <section class="section bg-light" id="solution">
+    <div class="section-inner">
+      <div class="solution-hero">
+        <div class="solution-text animate-on-scroll">
+          <div class="section-label">The Domo Difference</div>
+          <h2>Apps built on top of governed data, not apps that connect to data</h2>
+          <p>Every competitor starts with an app builder, then asks "where's your data?" Domo starts with the data and asks "what do you want to build?" Your apps inherit governance automatically with no extra configuration and no security gaps.</p>
+          <ul class="solution-points">
+            <li><span class="check"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>Governance is inherited, not bolted on</li>
+            <li><span class="check"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>Data is always live — no CSV exports, no stale snapshots</li>
+            <li><span class="check"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>1,000+ connectors feed a unified data layer</li>
+            <li><span class="check"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>Magic ETL handles transformation — no separate engineering stack</li>
+            <li><span class="check"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>AI-generated apps inherit governance by design — no security gaps</li>
+          </ul>
+        </div>
+        <div class="solution-visual animate-on-scroll">
+          <div class="solution-graphic">
+            <div class="graphic-layers">
+              <div class="graphic-layer">
+                <div class="graphic-layer-icon orange"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8"/><path d="M12 17v4"/></svg></div>
+                <div><div class="graphic-layer-text">Custom Business Apps</div><div class="graphic-layer-sub">Role-specific, interactive, write-back enabled</div></div>
+              </div>
+              <div class="graphic-connector"></div>
+              <div class="graphic-layer">
+                <div class="graphic-layer-icon blue"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l-1.9 5.8a2 2 0 0 1-1.287 1.288L3 12l5.8 1.9a2 2 0 0 1 1.288 1.288L12 21l1.9-5.8a2 2 0 0 1 1.287-1.288L21 12l-5.8-1.9a2 2 0 0 1-1.288-1.288Z"/></svg></div>
+                <div><div class="graphic-layer-text">Build Tools</div><div class="graphic-layer-sub">App Studio &middot; App Catalyst &middot; App Dev Framework</div></div>
+              </div>
+              <div class="graphic-connector"></div>
+              <div class="graphic-layer">
+                <div class="graphic-layer-icon purple"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+                <div><div class="graphic-layer-text">Automatic Governance</div><div class="graphic-layer-sub">PDP, row-level permissions, column masking, all inherited</div></div>
+              </div>
+              <div class="graphic-connector"></div>
+              <div class="graphic-layer">
+                <div class="graphic-layer-icon mint"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14a9 3 0 0 0 18 0V5"/><path d="M3 12a9 3 0 0 0 18 0"/></svg></div>
+                <div><div class="graphic-layer-text">Unified Data Layer</div><div class="graphic-layer-sub">1,000+ connectors &middot; Magic ETL &middot; Single source of truth</div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- BUILD PATHS -->
+  <section class="section bg-white" id="paths">
+    <div class="section-inner">
+      <div class="section-header center animate-on-scroll">
+        <div class="section-label">Three Ways to Build</div>
+        <h2 class="section-title">One platform. Your choice of tools.</h2>
+        <p class="section-subtitle">Whether you drag and drop, describe what you need in plain English, or write custom code, every app runs on the same governed data layer.</p>
+      </div>
+      <div class="paths-grid stagger">
+        <div class="path-card low-code animate-on-scroll">
+          <span class="path-badge">Low-Code / No-Code</span>
+          <h3>App Studio</h3>
+          <p>Visual development for rapid app creation. Anyone in the business can build interactive, data-powered applications with no coding required.</p>
+          <ul class="path-features">
+            <li>Drag-and-drop visual builder</li>
+            <li>20+ features in GA release</li>
+            <li>Reusable components and templates</li>
+            <li>Embedded workflows and automations</li>
+            <li>Role-specific customization</li>
+          </ul>
+          <a href="#demo" class="path-link">Learn More <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></a>
+        </div>
+        <div class="path-card ai-code animate-on-scroll">
+          <span class="path-badge">AI / Vibe-Orchestrating</span>
+          <h3>App Catalyst</h3>
+          <p>Move from raw code generation to application composition. Describe what you need and get a production-ready app foundation on your live enterprise data, with governance included from the start.</p>
+          <ul class="path-features">
+            <li>Natural language &rarr; functional app</li>
+            <li>Live code generation with instant preview</li>
+            <li>Automatic governance inheritance</li>
+            <li>Single-click publishing</li>
+            <li>Extensible pro-code foundations</li>
+          </ul>
+          <a href="#demo" class="path-link">Learn More <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></a>
+        </div>
+        <div class="path-card pro-code animate-on-scroll">
+          <span class="path-badge">Pro-Code</span>
+          <h3>App Dev Framework</h3>
+          <p>Build fully custom apps using JavaScript and any library. Full CLI tooling, flexible AppDB, and serverless cloud hosting with zero infrastructure overhead.</p>
+          <ul class="path-features">
+            <li>JavaScript + any library or framework</li>
+            <li>Domo CLI + VS Code integration</li>
+            <li>AppDB: cloud-scaled per-instance database</li>
+            <li>Serverless hosting at enterprise scale</li>
+            <li>Eliminates 75% of infrastructure work</li>
+          </ul>
+          <a href="#demo" class="path-link">Learn More <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- STATS -->
+  <section class="section stats-section" id="stats">
+    <div class="section-inner">
+      <div class="section-header center animate-on-scroll">
+        <div class="section-label">By the Numbers</div>
+        <h2 class="section-title">The shift to low-code is accelerating.<br>The data backs it up.</h2>
+      </div>
+      <div class="stats-grid stagger">
+        <div class="stat-item animate-on-scroll">
+          <div class="stat-number" data-value="75" data-suffix="%">0%</div>
+          <div class="stat-label">of new enterprise apps will use low-code by 2026</div>
+          <div class="stat-source">Gartner</div>
+        </div>
+        <div class="stat-item animate-on-scroll">
+          <div class="stat-number" data-value="1000" data-suffix="+">0</div>
+          <div class="stat-label">pre-built data connectors across the Domo platform</div>
+          <div class="stat-source">Domo</div>
+        </div>
+        <div class="stat-item animate-on-scroll">
+          <div class="stat-number" data-value="84" data-suffix="%">0%</div>
+          <div class="stat-label">of enterprises already use low-code or no-code platforms</div>
+          <div class="stat-source">Mendix / Statista</div>
+        </div>
+        <div class="stat-item animate-on-scroll">
+          <div class="stat-number" data-prefix="$" data-value="102" data-suffix="B">$0</div>
+          <div class="stat-label">projected low-code market size by 2030</div>
+          <div class="stat-source">Grand View Research</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- GOVERNANCE -->
+  <section class="section bg-white" id="governance">
+    <div class="section-inner">
+      <div class="governance-grid">
+        <div class="governance-text animate-on-scroll">
+          <div class="section-label">Built-In Governance</div>
+          <h2>Speed for your teams.<br>Control for IT.</h2>
+          <p>Every app — whether built by a citizen developer, generated by AI, or coded by an engineer, automatically inherits your organization's existing data governance. No extra configuration. No security gaps.</p>
+          <p style="font-size: 0.9375rem;">Citizen development doesn't mean ungoverned chaos. Apps consume governed data, standardized transformations, and shared metrics from the moment they're created.</p>
+          <div class="governance-badges">
+            <span class="governance-badge">SOC 2 Type II</span>
+            <span class="governance-badge">ISO 27001</span>
+            <span class="governance-badge">GDPR</span>
+            <span class="governance-badge">CCPA</span>
+            <span class="governance-badge">HIPAA</span>
+            <span class="governance-badge">FedRAMP</span>
+          </div>
+        </div>
+        <div class="governance-features stagger">
+          <div class="gov-feature animate-on-scroll">
+            <div class="gov-feature-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            </div>
+            <h4>Per-User Data Access</h4>
+            <p>Personalized Data Permissions (PDP) ensure every user sees only the data they're authorized to access.</p>
+          </div>
+          <div class="gov-feature animate-on-scroll">
+            <div class="gov-feature-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            </div>
+            <h4>Row-Level Permissions</h4>
+            <p>Granular row-level security policies automatically enforce data access boundaries in every app.</p>
+          </div>
+          <div class="gov-feature animate-on-scroll">
+            <div class="gov-feature-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg>
+            </div>
+            <h4>Column-Level Masking</h4>
+            <p>Sensitive fields are automatically masked based on user roles. No manual configuration per app.</p>
+          </div>
+          <div class="gov-feature animate-on-scroll">
+            <div class="gov-feature-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M16 13H8"/><path d="M16 17H8"/><path d="M10 9H8"/></svg>
+            </div>
+            <h4>Audit Trails</h4>
+            <p>Complete visibility into who accessed what data, when, and through which app. Full compliance documentation.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TESTIMONIALS -->
+  <section class="section bg-light" id="testimonials">
+    <div class="section-inner">
+      <div class="section-header center animate-on-scroll">
+        <div class="section-label">What Users Say</div>
+        <h2 class="section-title">Trusted by data teams worldwide</h2>
+      </div>
+      <div class="testimonials-grid stagger">
+        <div class="testimonial-card animate-on-scroll">
+          <div class="testimonial-stars">
+            <svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+            <svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+            <svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+            <svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+            <svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+          </div>
+          <p class="testimonial-quote">"I can connect to source data, extract, transform, and visualize in both App and Dashboard formats, eliminating the need for multiple platforms."</p>
+          <div class="testimonial-source">Verified User<span>G2 Review</span></div>
+        </div>
+        <div class="testimonial-card animate-on-scroll">
+          <div class="testimonial-stars">
+            <svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+            <svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+            <svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+            <svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+            <svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+          </div>
+          <p class="testimonial-quote">"The new App Studio makes it easier to build good-looking and customizable dashboards. Build once, modify, reuse, and avoid repetitive tasks."</p>
+          <div class="testimonial-source">Verified User<span>G2 Review</span></div>
+        </div>
+        <div class="testimonial-card animate-on-scroll">
+          <div class="testimonial-stars">
+            <svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+            <svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+            <svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+            <svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+            <svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+          </div>
+          <p class="testimonial-quote">"The best thing about Domo are the connectors — you can connect to all major data systems. It's a game changer for building unified data apps."</p>
+          <div class="testimonial-source">Verified User<span>Gartner Peer Insights</span></div>
+        </div>
+      </div>
+      <div class="review-badges animate-on-scroll">
+        <div class="review-badge">
+          <div class="review-badge-score">4.4</div>
+          <div class="review-badge-stars">
+            <svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+            <svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+            <svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+            <svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+            <svg viewBox="0 0 24 24" opacity="0.3"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+          </div>
+          <div class="review-badge-name">G2</div>
+          <div class="review-badge-count">897 reviews</div>
+        </div>
+        <div class="review-badge">
+          <div class="review-badge-score">4.5</div>
+          <div class="review-badge-stars">
+            <svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+            <svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+            <svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+            <svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+            <svg viewBox="0 0 24 24" opacity="0.3"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+          </div>
+          <div class="review-badge-name">Gartner Peer Insights</div>
+          <div class="review-badge-count">489 reviews</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FINAL CTA -->
+  <section class="final-cta" id="demo">
+    <div class="final-cta-inner animate-on-scroll">
+      <h2>Ready to build apps on data you already trust?</h2>
+      <p>See how Domo Apps can replace spreadsheets, static dashboards, and expensive custom-coded tools, all on a single governed platform.</p>
+      <a href="#" class="btn-primary">Request a Demo <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></a>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="footer-inner">
+      <svg class="footer-logo" viewBox="0 0 800 800" height="32">
+        <path fill="#FFF" d="M150.5,328.6c12.4,13.8,21.2,30.9,25,49.8,9.9-48.8,53-85.5,104.7-85.5s94.8,36.8,104.7,85.6v-85.6l106.8,106.8,107.1-106.8v85.6c9.9-48.8,53-85.6,104.7-85.6s79.2,24.8,96.4,60.7V0H0v292.9h70.8c31.7,0,60.1,13.8,79.7,35.7Z"/>
+        <path fill="#FFF" d="M703.6,506.6c-51.7,0-94.8-36.8-104.7-85.6v85.6h-36v-127.8l-71.1,71.4-71.4-71.4v127.8h-35.4v-85.6c-9.9,48.8-53,85.6-104.7,85.6s-94.8-36.7-104.7-85.5c-3.8,18.9-12.6,36-25,49.8-19.6,21.9-48,35.7-79.7,35.7H0v293.4h800v-354.2c-17.2,35.9-53.9,60.7-96.4,60.7h0Z"/>
+        <path fill="#FFF" d="M280.2,471c39.4,0,71.3-31.9,71.3-71.3s-31.9-71.3-71.3-71.3-71.3,31.9-71.3,71.3,31.9,71.3,71.3,71.3Z"/>
+        <path fill="#FFF" d="M142.1,399.7c0-37.8-29.4-68.7-66.6-71.1h-40.1v142.2h40.1c37.2-2.4,66.6-33.3,66.6-71.1h0Z"/>
+        <path fill="#FFF" d="M703.6,471c39.4,0,71.3-31.9,71.3-71.3s-31.9-71.3-71.3-71.3-71.3,31.9-71.3,71.3,31.9,71.3,71.3,71.3Z"/>
+        <path fill="#3F454D" d="M150.5,470.8c12.4-13.8,21.2-30.9,25-49.8,9.9,48.8,53,85.5,104.7,85.5s94.8-36.8,104.7-85.6v85.6h35.4v-127.8l71.4,71.4,71.1-71.4v127.8h36v-85.6c9.9,48.8,53,85.6,104.7,85.6s79.2-24.8,96.4-60.7v-92.2c-17.2-35.9-53.9-60.7-96.4-60.7s-94.8,36.8-104.7,85.6v-85.6l-107.1,106.8-106.8-106.8v85.6c-9.9-48.8-53-85.6-104.7-85.6s-94.8,36.7-104.7,85.5c-3.8-18.9-12.6-36-25-49.8-19.6-21.9-48-35.7-79.7-35.7H0v213.7h70.8c31.7,0,60.1-13.8,79.7-35.7h0ZM703.6,328.5c39.4,0,71.3,31.9,71.3,71.3s-31.9,71.3-71.3,71.3-71.3-31.9-71.3-71.3,31.9-71.3,71.3-71.3ZM280.2,328.5c39.4,0,71.3,31.9,71.3,71.3s-31.9,71.3-71.3,71.3-71.3-31.9-71.3-71.3,31.9-71.3,71.3-71.3ZM35.4,328.6h40.1c37.2,2.4,66.6,33.3,66.6,71.1s-29.4,68.7-66.6,71.1h-40.1v-142.2h0Z"/>
+      </svg>
+      <ul class="footer-links">
+        <li><a href="#">Platform</a></li>
+        <li><a href="#">Solutions</a></li>
+        <li><a href="#">Resources</a></li>
+        <li><a href="#">Pricing</a></li>
+        <li><a href="#">Contact</a></li>
+      </ul>
+    </div>
+    <p class="footer-copy">&copy; 2026 Domo, Inc. All rights reserved.</p>
+  </footer>
+
+  <script>
+    // Animated counters
+    function animateValue(el, start, end, duration, prefix, suffix) {
+      var startTime = performance.now();
+      function update(currentTime) {
+        var elapsed = currentTime - startTime;
+        var progress = Math.min(elapsed / duration, 1);
+        var easeOutExpo = 1 - Math.pow(2, -10 * progress);
+        var current = Math.floor(start + (end - start) * easeOutExpo);
+        el.textContent = (prefix || '') + current.toLocaleString() + (suffix || '');
+        if (progress < 1) requestAnimationFrame(update);
+      }
+      requestAnimationFrame(update);
+    }
+
+    // Delay observer setup until after first paint to prevent animation skip
+    requestAnimationFrame(function() {
+    requestAnimationFrame(function() {
+      // Scroll animations
+      var observer = new IntersectionObserver(function(entries) {
+        entries.forEach(function(entry) {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('visible');
+            observer.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.12 });
+      document.querySelectorAll('.animate-on-scroll').forEach(function(el) { observer.observe(el); });
+
+      // Stat counters
+      var statObserver = new IntersectionObserver(function(entries) {
+        entries.forEach(function(entry) {
+          if (entry.isIntersecting) {
+            var el = entry.target;
+            var value = parseInt(el.dataset.value);
+            var suffix = el.dataset.suffix || '';
+            var prefix = el.dataset.prefix || '';
+            // Force layout read then animate on next frame
+            el.getBoundingClientRect();
+            requestAnimationFrame(function() {
+              animateValue(el, 0, value, 1800, prefix, suffix);
+            });
+            statObserver.unobserve(el);
+          }
+        });
+      }, { threshold: 0.3 });
+      document.querySelectorAll('.stat-number').forEach(function(el) { statObserver.observe(el); });
+    });
+    });
+
+    // Nav scroll effect
+    const nav = document.getElementById('nav');
+    window.addEventListener('scroll', () => {
+      nav.classList.toggle('scrolled', window.scrollY > 20);
+    }, { passive: true });
+
+    // Subnav active state
+    const sections = document.querySelectorAll('section[id]');
+    const subnavLinks = document.querySelectorAll('.subnav a');
+    window.addEventListener('scroll', () => {
+      let current = '';
+      sections.forEach(section => {
+        const top = section.offsetTop - 140;
+        if (window.scrollY >= top) current = section.getAttribute('id');
+      });
+      subnavLinks.forEach(link => {
+        link.classList.toggle('active', link.getAttribute('href') === '#' + current);
+      });
+    }, { passive: true });
+
+    // Mobile nav toggle
+    const toggle = document.querySelector('.nav-mobile-toggle');
+    const navLinks = document.querySelector('.nav-links');
+    if (toggle) {
+      toggle.addEventListener('click', () => {
+        navLinks.style.display = navLinks.style.display === 'flex' ? 'none' : 'flex';
+      });
+    }
+  </script>
+
+</body>
+</html>
